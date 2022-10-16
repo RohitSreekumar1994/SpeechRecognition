@@ -2,7 +2,6 @@ import requests
 import time
 import pandas as pd
 
-
 upload_endpoint = "https://api.assemblyai.com/v2/upload"
 transcript_endpoint = "https://api.assemblyai.com/v2/transcript"
 
@@ -70,29 +69,26 @@ def get_paragraphs(polling_endpoint, header):
 
     return paragraphs
 
+
 def read_keywords():
     dataframe = pd.read_excel('Keywords.xlsx')
     x = dataframe.to_string(header=False,
-                      index=False,
-                      index_names=False).split('\n')
+                            index=False,
+                            index_names=False).split('\n')
     keywords = [','.join(ele.split()) for ele in x]
     for str in range(len(keywords)):
         keywords[str] = keywords[str].lower()
     return keywords
 
 
-
-def check_keywords_in_transcription():
+def check_keywords_in_transcription(output_file):
     read_keywords()
-    # print(read_keywords())
-    with open('transcript.txt') as f:
+    with open(output_file) as f:
         lines = str(f.readlines()[0])
         lines = lines.lower()
     try:
         for word in read_keywords():
             if word in lines:
-                print("TRANSCRIPTION CONTAINS KEYWORD(S)")
+                return True
     except PermissionError:
         print("ERROR: Please close the excel sheet")
-
-

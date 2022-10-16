@@ -11,51 +11,53 @@ def main():
 
     args = parser.parse_args()
 
-    # if args.api_key is None:
-    #     args.api_key = os.getenv("AAI_API_KEY")
-    #     if args.api_key is None:
-    #         raise RuntimeError("AAI_API_KEY environment variable not set. Try setting it now, or passing in your "
-    #                            "API key as a command line argument with `--api_key`.")
-    #
-    # # Create header with authorization along with content-type
-    # header = {
-    #     'authorization': args.api_key,
-    #     'content-type': 'application/json'
-    # }
-    #
-    # if args.local:
-    #     # Upload the audio file to AssemblyAI
-    #     upload_url = utils.upload_file(args.audio_file, header)
-    # else:
-    #     upload_url = {'upload_url': args.audio_file}
-    #
-    # # Request a transcription
-    # transcript_response = utils.request_transcript(upload_url, header)
-    #
-    #
-    # # Create a polling endpoint that will let us check when the transcription is complete
-    # polling_endpoint = utils.make_polling_endpoint(transcript_response)
-    #
-    # # Wait until the transcription is complete
-    # utils.wait_for_completion(polling_endpoint, header)
-    #
-    # # Request the paragraphs of the transcript
-    # paragraphs = utils.get_paragraphs(polling_endpoint, header)
-    #
-    # audio_file_name = args.audio_file.split(".")
-    #
-    # # Save and print transcript
-    # with open(audio_file_name, 'w') as f:
-    #     for para in paragraphs:
-    #         print(para['text'] + '\n')
-    #         f.write(para['text'] + '\n')
+    if args.api_key is None:
+        args.api_key = os.getenv("AAI_API_KEY")
+        if args.api_key is None:
+            raise RuntimeError("AAI_API_KEY environment variable not set. Try setting it now, or passing in your "
+                               "API key as a command line argument with `--api_key`.")
+
+    # Create header with authorization along with content-type
+    header = {
+        'authorization': args.api_key,
+        'content-type': 'application/json'
+    }
+
+    if args.local:
+        # Upload the audio file to AssemblyAI
+        upload_url = utils.upload_file(args.audio_file, header)
+    else:
+        upload_url = {'upload_url': args.audio_file}
+
+    # Request a transcription
+    transcript_response = utils.request_transcript(upload_url, header)
+
+
+    # Create a polling endpoint that will let us check when the transcription is complete
+    polling_endpoint = utils.make_polling_endpoint(transcript_response)
+
+    # Wait until the transcription is complete
+    utils.wait_for_completion(polling_endpoint, header)
+
+    # Request the paragraphs of the transcript
+    paragraphs = utils.get_paragraphs(polling_endpoint, header)
+
+    audio_file_name = args.audio_file.split("/")[1].split(".")[0]
+    print(audio_file_name)
+    output_path = 'output/' + audio_file_name
+
+    # Save and print transcript
+    with open(output_path, 'w') as f:
+        for para in paragraphs:
+            print(para['text'] + '\n')
+            f.write(para['text'] + '\n')
 
 
     #Check if transcription contain keywords
-    utils.check_keywords_in_transcription()
+    if utils.check_keywords_in_transcription(output_file=output_path):
+        print("TRANSCRIPTION CONTAINS KEYWORD(S)")
 
     return
-
 
 
 if __name__ == '__main__':
